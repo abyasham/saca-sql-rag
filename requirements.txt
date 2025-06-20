@@ -1,0 +1,33 @@
+# Core dependencies for Security IoT Analysis Bot
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+sqlite3
+
+# Machine Learning and AI models
+torch>=2.0.0
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# LLMware for SQL functionality
+llmware>=0.2.0
+
+# Document processing
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# Additional utilities
+requests>=2.31.0
+urllib3>=2.0.0
+charset-normalizer>=3.2.0
+
+# Optional GPU support (uncomment if you have CUDA)
+# torch-audio>=2.0.0
+# torchvision>=0.15.0
+
+# Development and debugging
+ipython>=8.0.0
+jupyter>=1.0.0
