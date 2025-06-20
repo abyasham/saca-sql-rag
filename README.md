@@ -26,3 +26,15 @@ This project implements a Retrieval-Augmented Generation (RAG) system for SQL qu
 ## Analysis
 
 The `saca_sql_rag_ok.ipynb` notebook contains the core analysis and experimentation for this project. It demonstrates the process of extracting data from PCAP files, generating SQL queries, and utilizing an LLM to provide insightful responses. Key steps include data preprocessing, feature engineering, model training, and evaluation.
+
+## Architectural Design
+
+SACA (Security Audit Contextual Assistant) is designed as a Retrieval-Augmented Generation (RAG) system to enhance security audits through intelligent data analysis. The architecture consists of the following key components:
+
+1.  **Data Ingestion:** PCAP files are ingested and parsed to extract relevant network traffic data.
+2.  **Data Preprocessing:** Extracted data is cleaned, transformed, and prepared for analysis.
+3.  **SQL Query Generation:** Based on user prompts or predefined security audit questions, SQL queries are generated to retrieve specific information from the processed data.
+4.  **LLM Integration:** A Large Language Model (LLM) is used to interpret the SQL query results and generate human-readable, contextualized responses.
+5.  **Output & Reporting:** The LLM-generated responses are presented to the user, providing insights into potential security vulnerabilities or anomalies.
+
+This architecture allows SACA to provide a more comprehensive and contextualized security audit experience by leveraging the power of LLMs and the precision of SQL queries.
