@@ -1,29 +1,27 @@
 # SACA-SQL-RAG
 
-🛡️ **Security Audit Compliance Assistant with SQL Query and RAG**
+🛡️ **Security Analysis Contextual Assistant with SQL Query and RAG**
 
-A comprehensive Retrieval-Augmented Generation (RAG) system for security audit analysis using Large Language Models (LLMs). SACA combines network traffic analysis, SQL query generation, and intelligent document processing to provide insights from security audit data and policy compliance.
+A comprehensive Retrieval-Augmented Generation (RAG) system for security audit analysis using Large Language Models (LLMs). SACA combines network traffic analysis, SQL query generation, and intelligent document processing to provide insights from network data and policy documents.
 
 ## 🚀 Features
 
-- **🔍 Network Traffic Analysis**: Analyze CSV audit data with intelligent SQL query generation
+- **🔍 Network Traffic Analysis**: Analyze network traffic data with intelligent SQL query generation
 - **📋 Policy Document Processing**: RAG-based analysis of security policy documents (PDF, DOCX, TXT, JSON)
 - **🤖 Dual AI Support**: 
   - Online API models (OpenRouter with multiple LLM options)
   - Local Hugging Face models for offline operation
 - **🎯 Accuracy Testing**: Built-in evaluation system with ground truth security scenarios
-- **💬 Interactive Chat Interface**: Streamlit-based UI for seamless interaction
 - **🔒 Security-First Design**: Automated detection of unauthorized access, failed connections, and policy violations
 
 ## 🏗️ Architecture
 
-SACA (Security Audit Compliance Assistant) implements a sophisticated RAG architecture:
+SACA implements a sophisticated RAG architecture:
 
-1. **📊 Data Ingestion**: CSV audit data and policy documents are processed and indexed
+1. **📊 Data Ingestion**: CSV/PCAP network data and policy documents are processed and indexed
 2. **🧠 Intelligent Query Processing**: Natural language questions are converted to SQL queries
 3. **🔍 RAG Document Search**: Semantic search through policy documents with relevance scoring
 4. **🤖 LLM Integration**: Multiple AI models for contextual analysis and response generation
-5. **📈 Accuracy Evaluation**: Continuous assessment against security audit benchmarks
 
 ## 🛠️ Installation
 
@@ -46,12 +44,12 @@ SACA (Security Audit Compliance Assistant) implements a sophisticated RAG archit
 
 ## 🚀 Usage
 
-### Basic Usage
+### Normal Usage
 ```bash
 streamlit run saca_sql_rag_local.py
 ```
 
-### LLMware Integration (Advanced)
+### More lightweight usage
 ```bash
 streamlit run saca_sql.py
 ```
@@ -61,7 +59,7 @@ streamlit run saca_sql.py
 ```
 saca-sql-rag/
 ├── saca_sql_rag_local.py    # Main Streamlit application
-├── saca_sql.py              # LLMware-based implementation
+├── saca_sql.py              # lightweight LLMware-based implementation
 ├── requirements.txt         # Python dependencies
 ├── .env.example            # Environment configuration template
 ├── .gitignore              # Git ignore rules
@@ -130,7 +128,7 @@ SACA includes a comprehensive evaluation system:
 
 ## 📄 License
 
-This project is open source. Please check the repository for license details.
+This project is open source.
 
 ## 🆘 Support
 
@@ -141,7 +139,7 @@ For issues, questions, or contributions:
 
 ## 🔒 Security Note
 
-This tool is designed for security audit analysis. Always ensure:
+This tool is designed for in-depth security analysis (audit/forensic). Always ensure:
 - Sensitive data is properly handled
 - API keys are kept secure
 - Audit logs are processed in compliance with your organization's policies
