@@ -1,5 +1,8 @@
 import os
 
+# Force CPU-only mode to avoid CUDA compatibility issues
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import streamlit as st
 from llmware.resources import CustomTable
 from llmware.models import ModelCatalog
@@ -9,42 +12,7 @@ from llmware.configs import LLMWareConfig
 from llmware.agents import LLMfx
 from llmware.setup import Setup
 
-LLMWareConfig().llmware_path = "/home/wistara/llmware_data"
-
-""" This example provides a basic framework to build a "Security Audit Compliance Agent (SACA)" using Text-to-SQL data query designed to integrate both 'RAG' source documents
-and 'SQL' tables (e.g., CSV files), and interface using natural language with a chatbot UI. SACA meant as an AI assistant for auditors to gain insight into security compliance
-and risk management by simplifying the process of querying data and audit trails documents.
-
-    Models - this example uses 3 models, running locally
-
-        -- bling-phi-3-gguf     -   core RAG question-answer model
-        -- slim-sql-tool        -   fast local text-to-sql model
-        -- jina-reranker-turbo  -   reranking model from Jina AI
-            -- for more info on Jina AI model - see https://huggingface.co/jinaai/jina-reranker-v1-turbo-en
-
-    Database - the SQL functionality will load a table into SQLite (no install required)
-
-    Pre-reqs -
-
-    1.  Streamlit - to run this example requires an install of Streamlit, e.g., `pip3 install streamlit`
-
-        -- To execute the script, run from the command line with:  `streamlit run saca_sql.py`
-        -- For more information on the Streamlit Chat UI, see
-            https://docs.streamlit.org/develop/tutorials/llms/build-conversational-apps
-
-    Sample Data -
-
-        -- by default, at startup, the app will load a simple security policy document and network traffic sample document (toniot_train_network.csv)
-        -- RAG test question:  'what is the company policy on transport layer security?'
-        -- SQL test question:  'list the destination ports that are commonly targeted by 'scanning' attacks. Show unique ports.'
-
-    2.  Add new documents or CSV files on the left side panel upload buttons.
-
-    All components of the SACA SQL will be running locally, so the speed will be determined greatly by the
-    CPU/GPU capacities and ** memory ** of your machine.  We would recommend at least 16 GB of RAM, and ideally 32 GB
-    to run it. This work was originally developed by LLMWarw https://github.com/llmware-ai/llmware/blob/main/examples/Use_Cases/biz_bot.py.
-
-"""
+LLMWareConfig().set_llmware_path_name("./llmware_data")
 
 #   keeps a running state of any csv tables that have been loaded in the session to avoid duplicated inserts
 if "loaded_tables" not in st.session_state:
@@ -110,8 +78,26 @@ def load_prompt_model():
 
     """ Loads the core RAG model used for fact-based question-answering against the source materials. """
 
-    prompter = Prompt().load_model("bling-phi-3-gguf", temperature=0.0, sample=False)
-    return prompter
+    # Force CPU-only mode to avoid CUDA compatibility issues
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    
+    # Use a simple, lightweight approach
+    try:
+        # Try the smallest available model
+        prompter = Prompt().load_model("bling-answer-tool", temperature=0.0, sample=False, use_gpu=False)
+        return prompter
+    except Exception as e:
+        print(f"Failed to load bling-answer-tool: {e}")
+        try:
+            # Try another lightweight option
+            prompter = Prompt().load_model("dragon-yi-answer-tool", temperature=0.0, sample=False, use_gpu=False)
+            return prompter
+        except Exception as e:
+            print(f"Failed to load dragon-yi-answer-tool: {e}")
+            # Final fallback - disable RAG mode
+            st.warning("⚠️ RAG models could not be loaded due to CUDA compatibility issues. Only SQL mode will be available.")
+            return None
 
 
 @st.cache_resource
@@ -120,9 +106,8 @@ def load_agent_model():
     """ Loads the Text2SQL model used for querying the CSV table. """
 
     agent = LLMfx()
-    llmware_path = LLMWareConfig().llmware_path
-    model_path = os.path.join(llmware_path, "slim-sql-tool")
-    agent.load_tool("sql", sample=False, get_logits=True, temperature=0.0, model_path=model_path)
+    # Load the SQL tool without specifying model_path - it will use default
+    agent.load_tool("sql", use_gpu=False, sample=False, get_logits=True, temperature=0.0)
     return agent
 
 
@@ -140,6 +125,10 @@ def parse_file(fp, doc):
 def get_rag_response(prompt, parser_output, reranker_model, prompter):
 
     """ Executes a RAG response. """
+    
+    # Handle case where prompter is None (demo mode)
+    if prompter is None:
+        return f"Demo Mode: I received your question '{prompt}' but cannot process it without a working model. Please check the model configuration."
 
     #   if the number of text chunks is small, then will skip the reranker
     if len(parser_output) > 3:
@@ -221,7 +210,8 @@ def get_rag_response(prompt, parser_output, reranker_model, prompter):
 
                     bot_response += "\\n\\n" + source_output
 
-    prompter.clear_source_materials()
+    if prompter:
+        prompter.clear_source_materials()
 
     return bot_response
 
@@ -240,7 +230,7 @@ def get_sql_response(prompt, agent, db=None, table_name=None):
         show_sql = True
         prompt = prompt[:-(len(" #SHOW"))]
 
-    model_response = agent.query_custom_table(prompt, db=db, table_name=table_name)
+    model_response = agent.query_custom_table(prompt, db=db, table=table_name)
 
     # insert additional error checking / post-processing of output here
     error_handle = False
@@ -269,7 +259,7 @@ def get_sql_response(prompt, agent, db=None, table_name=None):
 
 def biz_bot_ui_app (db="postgres", table_name=None, fp=None,doc=None):
 
-    LLMWareConfig().llmware_path = "/home/wistara/llmware_data"
+    LLMWareConfig().set_llmware_path_name("./llmware_data")
 
     st.title(f"SACA SQL - Security Audit Compliance Agent using SQL Query")
 
@@ -294,8 +284,14 @@ def biz_bot_ui_app (db="postgres", table_name=None, fp=None,doc=None):
 
     with st.sidebar:
 
-        st.write("SACA SQL - Security Audit Compliance Agent using SQL Query")
-        model_type = st.selectbox("Pick your mode", ("RAG","SQL"), index=0)
+        st.write("SACA SQL - Security Audit Contextual Agent using SQL Query")
+        
+        # Check if RAG model is available
+        if prompter is None:
+            st.warning("⚠️ RAG mode unavailable due to model compatibility issues")
+            model_type = st.selectbox("Pick your mode", ("SQL",), index=0)
+        else:
+            model_type = st.selectbox("Pick your mode", ("RAG","SQL"), index=0)
 
         uploaded_doc = st.file_uploader("Upload Document")
         uploaded_table = st.file_uploader("Upload CSV")
@@ -345,7 +341,7 @@ def biz_bot_ui_app (db="postgres", table_name=None, fp=None,doc=None):
 
 if __name__ == "__main__":
 
-    LLMWareConfig().llmware_path = "/home/wistara/llmware_data"
+    LLMWareConfig().set_llmware_path_name("./llmware_data")
 
     #   note: there is a hidden 'magic' command in the chatbot - if you add " #SHOW" at the end of your query,
     #   then it will display the SQL command that was generated (very useful for debugging)
@@ -359,11 +355,11 @@ if __name__ == "__main__":
     #   substitute your own csv to get started
 
     # CSV section
-    local_csv_path = "/home/abyasa/bsegolily/csv_data"
+    local_csv_path = "./csv_data"
     build_table(db=db, table_name=table_name, load_fp=local_csv_path, load_file="sampled_toniot_dataset.csv")
 
     # PDF section
-    fp = "/home/abyasa/bsegolily/csv_data"  # Make sure this folder exists
+    fp = "./csv_data"  # Make sure this folder exists
     fn = "nayaone-sec.pdf"  # Replace with your actual PDF filename
 
     biz_bot_ui_app(db=db, table_name=table_name,fp=fp, doc=fn)

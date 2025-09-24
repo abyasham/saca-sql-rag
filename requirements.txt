@@ -1,16 +1,16 @@
-# Core dependencies for Security IoT Analysis Bot
+# Core dependencies for Security Audit Compliance Agent (SACA)
 streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
-sqlite3
+# NOTE: sqlite3 is built-in to Python - removed from requirements
+
+# LLMware - Main AI/ML framework (updated version)
+llmware>=0.2.15
 
 # Machine Learning and AI models
 torch>=2.0.0
 transformers>=4.30.0
 accelerate>=0.20.0
-
-# LLMware for SQL functionality
-llmware>=0.2.0
 
 # Document processing
 PyPDF2>=3.0.0
@@ -23,6 +23,12 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 urllib3>=2.0.0
 charset-normalizer>=3.2.0
+
+# Additional dependencies for llmware functionality
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.0
+pymongo>=4.0.0
+chromadb>=0.4.0
 
 # Optional GPU support (uncomment if you have CUDA)
 # torch-audio>=2.0.0
