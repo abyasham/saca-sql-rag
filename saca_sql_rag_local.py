@@ -938,8 +938,13 @@ def main():
     
     # Initialize assistant if files are uploaded
     if audit_file and policy_file:
-        audit_path = f"./temp/{audit_file.name}"
-        policy_path = f"./temp/{policy_file.name}"
+        # Create temp directory if it doesn't exist
+        temp_dir = "./temp"
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+            
+        audit_path = f"{temp_dir}/{audit_file.name}"
+        policy_path = f"{temp_dir}/{policy_file.name}"
         
         with open(audit_path, "wb") as f:
             f.write(audit_file.getvalue())
